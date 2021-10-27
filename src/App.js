@@ -20,9 +20,22 @@ function App() {
 
   function handleKeyDown(e, i) {
     if (e.key === "Enter") {
-      updateTodoAtIndex(e, i);
       createTodoAtIndex(e, i);
     }
+    if (e.key === "backspace" && todos[i].content === "") {
+      e.preventDefault();
+      return removeTodoAtIndex(i);
+    }
+  }
+
+  function removeTodoAtIndex(i) {
+    if (i === 0 && todos.length === 1) return;
+    setTodos((todos) =>
+      todos.slice(0, i).concat(todos.slice(i + 1, todos.length))
+    );
+    setTimeout(() => {
+      document.forms[0].elements[i - 1].focus();
+    }, 0);
   }
 
   function createTodoAtIndex(e, i) {
@@ -43,6 +56,12 @@ function App() {
     setTodos(newTodos);
   }
 
+  function toggleTodoCompleteAtIndex(index) {
+    const temporaryTodos = [...todos];
+    temporaryTodos[index].isCompleted = !temporaryTodos[index].isCompleted;
+    setTodos(temporaryTodos);
+  }
+
   return (
     <div className="App">
       <header className="App-header">
@@ -51,13 +70,18 @@ function App() {
       <form className="my-todo-list">
         <ul>
           {todos.map((todo, i) => (
-            <div className="todo">
-              <div className="checkbox" />
+            <div className={`todo ${todo.isCompleted && "todo-is-completed"}`}>
+              <div
+                className={"checkbox"}
+                onClick={() => toggleTodoCompleteAtIndex(i)}
+              >
+                {todo.isCompleted && <span>&#x27154;</span>}
+              </div>
               <input
                 type="text"
                 value={todo.content}
                 onKeyDown={(e) => handleKeyDown(e, i)}
-                onChange={updateTodoAtIndex}
+                onChange={(e) => updateTodoAtIndex(e, i)}
               />
             </div>
           ))}
